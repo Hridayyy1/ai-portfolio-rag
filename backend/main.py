@@ -15,7 +15,7 @@ app = FastAPI()
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,20 +36,26 @@ def extract_text_from_pdf(file_path):
 def chunk_text(text, chunk_size=500):
     return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
 
+
 # -------- RAG Setup --------
 model = SentenceTransformer("all-MiniLM-L6-v2")
 chroma_client = chromadb.Client()
+
 collection = chroma_client.create_collection(name="resume_collection")
 
-resume_text = extract_text_from_pdf("resume.pdf")
-chunks = chunk_text(resume_text)
-embeddings = model.encode(chunks).tolist()
+# Try loading resume safely
+if os.path.exists("resume.pdf"):
+    resume_text = extract_text_from_pdf("resume.pdf")
+    chunks = chunk_text(resume_text)
+    embeddings = model.encode(chunks).tolist()
 
-collection.add(
-    documents=chunks,
-    embeddings=embeddings,
-    ids=[f"id_{i}" for i in range(len(chunks))]
-)
+    collection.add(
+        documents=chunks,
+        embeddings=embeddings,
+        ids=[f"id_{i}" for i in range(len(chunks))]
+    )
+else:
+    print("⚠ resume.pdf not found. RAG not initialized.")
 
 # -------- Chat Request --------
 class ChatRequest(BaseModel):
