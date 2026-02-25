@@ -80,7 +80,7 @@ ChromaDB (Vector Retrieval) → OpenRouter LLM → Response
 
 ```bash
 git clone https://github.com/Hridayyy1/ai-portfolio-rag
-cd your-repo-name
+cd https://github.com/Hridayyy1/ai-portfolio-rag
 ```
 
 ---
